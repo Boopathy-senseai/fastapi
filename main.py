@@ -6,4 +6,4 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"message": "Hello,Deploy  FastAPI on AWS Fargate"}
+    return {"message": "github action run successfully, ci cd implementated"}
