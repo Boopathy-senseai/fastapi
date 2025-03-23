@@ -153,8 +153,8 @@ jobs:
           run: |
             docker buildx create --use
             docker buildx inspect --bootstrap
-            docker buildx build --platform linux/arm64 -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/project:latest --push .
-  
+            docker buildx build --platform linux/arm64 -t 273354660155.dkr.ecr.us-east-1.amazonaws.com/project:latest --push .
+            
         - name: Deploy to ECS
           uses: imehedi/actions-awscli-v2@latest
           with:
