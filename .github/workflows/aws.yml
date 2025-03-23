@@ -45,7 +45,8 @@ jobs:
           run: |
             docker buildx create --use
             docker buildx inspect --bootstrap
-            docker buildx build --platform linux/arm64 -t 273354660155.dkr.ecr.us-east-1.amazonaws.com/project:latest --push .
+            docker buildx build --platform linux/amd64,linux/arm64 -t 273354660155.dkr.ecr.us-east-1.amazonaws.com/project:latest --push .
+
         - name: Stop running tasks (force kill)
           run: |
               TASK_IDS=$(aws ecs list-tasks --cluster deploy-fastpi --service fastapi-deploy --query 'taskArns[*]' --output text)
