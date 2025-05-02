@@ -1,64 +1,64 @@
-name: Build and Deploy BackendApp to ECS
+# name: Build and Deploy BackendApp to ECS
 
-on:
-  push:
-    branches: [ "main" ]
+# on:
+#   push:
+#     branches: [ "main" ]
   
-env:
-    ECR_BACKEND_IMAGE: project
-    AWS_DEFAULT_REGION: us-east-1
-    ECS_CLUSTER: deploy-fastpi
-    ECS_BACKEND_SERVICE: fastapi-deploy
-jobs:
-    deploy:
-      runs-on: ubuntu-latest
+# env:
+#     ECR_BACKEND_IMAGE: project
+#     AWS_DEFAULT_REGION: us-east-1
+#     ECS_CLUSTER: deploy-fastpi
+#     ECS_BACKEND_SERVICE: fastapi-deploy
+# jobs:
+#     deploy:
+#       runs-on: ubuntu-latest
   
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v2
+#       steps:
+#         - name: Checkout repository
+#           uses: actions/checkout@v2
   
-        - name: Set up QEMU for arm64
-          run: |
-            docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          if: runner.os == 'Linux'
+#         - name: Set up QEMU for arm64
+#           run: |
+#             docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+#           if: runner.os == 'Linux'
   
-        - name: Set up Docker for arm64
-          uses: docker/setup-qemu-action@v2
-          with:
-            platforms: linux/arm64
+#         - name: Set up Docker for arm64
+#           uses: docker/setup-qemu-action@v2
+#           with:
+#             platforms: linux/arm64
   
-        - name: Set up Docker
-          uses: docker/setup-buildx-action@v3
+#         - name: Set up Docker
+#           uses: docker/setup-buildx-action@v3
   
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v2
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-east-1
+#         - name: Configure AWS credentials
+#           uses: aws-actions/configure-aws-credentials@v2
+#           with:
+#             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#             aws-region: us-east-1
   
-        - name: Login to Amazon ECR
-          id: login-ecr
-          uses: aws-actions/amazon-ecr-login@v1
+#         - name: Login to Amazon ECR
+#           id: login-ecr
+#           uses: aws-actions/amazon-ecr-login@v1
 
-        - name: Build and push Docker image
-          run: |
-            docker buildx create --use
-            docker buildx inspect --bootstrap
-            docker buildx build --platform linux/amd64,linux/arm64 -t 273354660155.dkr.ecr.us-east-1.amazonaws.com/project:latest --push .
+#         - name: Build and push Docker image
+#           run: |
+#             docker buildx create --use
+#             docker buildx inspect --bootstrap
+#             docker buildx build --platform linux/amd64,linux/arm64 -t 273354660155.dkr.ecr.us-east-1.amazonaws.com/project:latest --push .
 
-        - name: Stop running tasks (force kill)
-          run: |
-              TASK_IDS=$(aws ecs list-tasks --cluster deploy-fastpi --service fastapi-deploy --query 'taskArns[*]' --output text)
-              if [ ! -z "$TASK_IDS" ]; then
-                aws ecs stop-task --cluster deploy-fastpi --task $TASK_IDS
-              fi
+#         - name: Stop running tasks (force kill)
+#           run: |
+#               TASK_IDS=$(aws ecs list-tasks --cluster deploy-fastpi --service fastapi-deploy --query 'taskArns[*]' --output text)
+#               if [ ! -z "$TASK_IDS" ]; then
+#                 aws ecs stop-task --cluster deploy-fastpi --task $TASK_IDS
+#               fi
             
-        - name: Deploy to ECS
-          uses: imehedi/actions-awscli-v2@latest
-          with:
-            args: ecs update-service --cluster deploy-fastpi --service fastapi-deploy --force-new-deployment
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_DEFAULT_REGION: "us-east-1"
+#         - name: Deploy to ECS
+#           uses: imehedi/actions-awscli-v2@latest
+#           with:
+#             args: ecs update-service --cluster deploy-fastpi --service fastapi-deploy --force-new-deployment
+#           env:
+#             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#             AWS_DEFAULT_REGION: "us-east-1"
